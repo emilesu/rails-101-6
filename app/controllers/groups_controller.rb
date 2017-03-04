@@ -1,5 +1,5 @@
 class GroupsController < ApplicationController
-  before_action :authenticate_user! , only: [:new, :create]
+  before_action :authenticate_user! , only: [:new, :create, :edit, :update, :destroy]
 
   def index
     @groups = Group.all
@@ -25,10 +25,19 @@ class GroupsController < ApplicationController
 
   def edit
     @group = Group.find(params[:id])
+
+    if current_user != @group.user
+      redirect_to root_path, alert: "你没有权限"
+    end
   end
 
   def update
     @group = Group.find(params[:id])
+
+    if current_user != @group.user
+      redirect_to root_path, alert: "你没有权限"
+    end
+
     if @group.update(group_params)
       redirect_to groups_path, notice: "Update Success"
     else
@@ -38,10 +47,13 @@ class GroupsController < ApplicationController
 
   def destroy
     @group = Group.find(params[:id])
-    @group.destroy
-    flash[:alert] = "Group delete"
 
-      redirect_to groups_path
+    if current_user != @group.user
+      redirect_to root_path, alert: "你没有权限"
+    end
+
+    @group.destroy
+    redirect_to groups_path, alert: "Grouo deleted"
   end
 
 
